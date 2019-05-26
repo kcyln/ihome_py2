@@ -24,5 +24,30 @@ $(document).ready(function() {
             $("#password-err").show();
             return;
         }
+        // 调用ajax向后端发送登录请求
+        var req_data = {
+            mobile: mobile,
+            password: passwd
+        }
+        var req_json = JSON.stringify(req_data)
+        $.ajax({
+            url: "/api/v1.0/sessions", 
+            type: "post",
+            data: req_json,
+            contentType: "application/json",
+            dataType: "json",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            },//　请求头，讲csrf_token值放到请求中，方便后端csrf进行验证
+            success: function(resp){
+                if (resp.errno == "0"){
+                    // 登录成功，跳转到主页
+                    location.href　=　"/index.html"
+                }else{
+                    $("#password-err span").html(resp.errmsg);
+                    $("#password-err").show();
+                }
+            }
+        })
     });
 })

@@ -2,6 +2,8 @@
 
 from datetime import datetime
 from . import db
+from flask import jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class BaseModel(object):
@@ -24,6 +26,22 @@ class User(BaseModel, db.Model):
     avatar_url = db.Column(db.String(128))  # 用户头像路径
     houses = db.relationship("House", backref="user")  # 用户发布的房屋
     orders = db.relationship("Order", backref="user")  # 用户下的订单
+    
+    # def password_hash(self, origin_password):
+    #     """对密码进行加密"""
+    #     self.password_hash = generate_password_hash(origin_password)
+
+    @property
+    def password(self):
+        # return self.password_hash
+        raise AttributeError("这个属性只能设置，不能读取")
+    
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, passwd):
+        return check_password_hash(self.password_hash, passwd)
 
 
 class Area(BaseModel, db.Model):

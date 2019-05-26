@@ -58,7 +58,17 @@ function goToSearchPage(th) {
 }
 
 $(document).ready(function(){
-    $(".top-bar>.register-login").show();
+    // $(".top-bar>.register-login").show();
+    // 检查用户的登录状态
+    $.get("api/v1.0/session", function(resp){
+        if (resp.errmsg == "true"){
+            $(".user-name").html(resp.name);
+            $(".user-info").show();
+        }else{
+            $(".register-login").show();
+        }
+    }, "json");
+    
     var mySwiper = new Swiper ('.swiper-container', {
         loop: true,
         autoplay: 2000,
@@ -84,4 +94,5 @@ $(document).ready(function(){
         var date = $(this).datepicker("getFormattedDate");
         $("#start-date-input").val(date);
     });
+
 })
