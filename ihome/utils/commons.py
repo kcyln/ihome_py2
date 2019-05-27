@@ -21,7 +21,7 @@ def login_required(view_func):
     @functools.wraps(view_func)
     def wrapper(*args, **kwargs):
         # 判断用户的登录状态
-        user_id = session.get("session")
+        user_id = session.get("user_id")
         # 如果用户是登录状态，可以执行；否则，返回未登录的信息
         if user_id is not None:
             # 将user_id保存到g对象中，在视图函数中可以通过g对象获取数据
