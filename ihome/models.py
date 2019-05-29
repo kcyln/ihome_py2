@@ -4,7 +4,7 @@ from datetime import datetime
 from . import db
 from flask import jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from ihome import constants
 
 class BaseModel(object):
     """模型基类，为每个模型补充创建时间与更新时间"""
@@ -43,6 +43,25 @@ class User(BaseModel, db.Model):
     def check_password(self, passwd):
         return check_password_hash(self.password_hash, passwd)
 
+    def to_dict(self):
+        """将对象转换为字典"""
+        user_dict = {
+            "user_id": self.id,
+            "name": self.name,
+            "mobile": self.mobile,
+            "avatar": constants.QINIU_URL_DOMAIN + self.avatar_url if self.avatar_url else "",
+            "create_time": self.create_time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        return user_dict
+
+    def auth_to_dict(self):
+        """将实名信息转换为字典"""
+        auth_dict = {
+            "user_id": self.id,
+            "real_name": self.real_name,
+            "id_card": self.id_card
+        }
+        return auth_dict
 
 class Area(BaseModel, db.Model):
     """城区"""
@@ -52,6 +71,14 @@ class Area(BaseModel, db.Model):
     id = db.Column(db.Integer, primary_key=True)  # 区域编号
     name = db.Column(db.String(32), nullable=False)  # 区域名字
     houses = db.relationship("House", backref="area")  # 区域的房屋
+
+    def to_dict(self):
+        """将对象转换为字典"""
+        d = {
+            "aid": self.id,
+            "aname": self.name
+        }
+        return d
 
 
 house_facility = db.Table(
