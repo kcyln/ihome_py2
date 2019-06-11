@@ -116,6 +116,69 @@ class House(BaseModel, db.Model):
     images = db.relationship("HouseImage")  # 房屋的图片
     orders = db.relationship("Order", backref="house")  # 房屋的订单
 
+    def to_basic_dict(self):
+        """将基本信息转换为字典数据"""
+        house_dict = {
+            "house_id": self.id,
+            "title": self.title,
+            "price": self.price,
+            "area_name": self.area.name,
+            "img_url": self.constants.QINIU_URL_DOMAIN + self.index_image_url if self.index_image_url else "",
+            "room_count": self.room_count,
+            "order_count": self.order_count,
+            "address": self.address,
+            "user_avatar": self.constants.QINIU_URL_DOMAIN + self.user.avatar_url if self.user.avatar_url else "",
+            "ctime": self.create_time.strftime("%Y-%m-%d")
+        }
+
+        return house_dict
+
+    def to_full_dict(self):
+        house_dict = {
+            "hid": self.id,
+            "user_id": self.user_id,
+            "user_name": self.user.name,
+            "title": self.title,
+            "price": self.price,
+            "area_name": self.area.name,
+            "acreage": self.acreage,
+            "unit": self.unit,
+            "capacity": self.capacity,
+            "beds": self.beds,
+            "deposit": self.deposit,
+            "room_count": self.room_count,
+            "address": self.address,
+            "min_days": self.min_days,
+            "max_days": self.max_days,
+            "user_avatar": self.constants.QINIU_URL_DOMAIN + self.user.avatar_url if self.user.avatar_url else "",
+        }
+
+        # 房屋图片
+        img_urls = []
+        for image in self.images:
+            img_urls.append(constants.QINIU_URL_DOMAIN + image.url)
+        house_dict["img_urls"] = img_urls
+
+        # 房屋设施
+        facilities = []
+        for facility in self.facilities:
+            facilities.append(facility.id)
+        house_dict["facilities"] = facilities
+
+        # 评论信息
+        comments = []
+        orders = Order.query.filter(Order.house_id == self.id, Order.status == "COMPLETE", Order.comment != None) \
+            .order_by(Order.update_time.desc()).limit(constants.HOUSE_DETAIL_COMMENT_DISPLAY_COUNTS)
+        for order in orders:
+            comment = {
+                "comment": order.comment,
+                "user_name": order.user.name if order.user.name != order.user.mobile else "匿名用户",
+                "ctime": order.update_time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            comments.append(comment)
+        house_dict["comments"] = comments
+        return house_dict
+
 
 class Facility(BaseModel, db.Model):
     """设施信息"""

@@ -31,7 +31,7 @@ $(document).ready(function(){
                 }
             }
         })
-    })
+    });
     $("#form-name").submit(function(e){
         // 阻止表单的默认行为
         e.preventDefault();
