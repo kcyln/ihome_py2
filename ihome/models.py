@@ -123,11 +123,11 @@ class House(BaseModel, db.Model):
             "title": self.title,
             "price": self.price,
             "area_name": self.area.name,
-            "img_url": self.constants.QINIU_URL_DOMAIN + self.index_image_url if self.index_image_url else "",
+            "img_url": constants.QINIU_URL_DOMAIN + self.index_image_url if self.index_image_url else "",
             "room_count": self.room_count,
             "order_count": self.order_count,
             "address": self.address,
-            "user_avatar": self.constants.QINIU_URL_DOMAIN + self.user.avatar_url if self.user.avatar_url else "",
+            "user_avatar": constants.QINIU_URL_DOMAIN + self.user.avatar_url if self.user.avatar_url else "",
             "ctime": self.create_time.strftime("%Y-%m-%d")
         }
 
@@ -150,7 +150,7 @@ class House(BaseModel, db.Model):
             "address": self.address,
             "min_days": self.min_days,
             "max_days": self.max_days,
-            "user_avatar": self.constants.QINIU_URL_DOMAIN + self.user.avatar_url if self.user.avatar_url else "",
+            "user_avatar": constants.QINIU_URL_DOMAIN + self.user.avatar_url if self.user.avatar_url else "",
         }
 
         # 房屋图片

@@ -2,7 +2,7 @@
 
 from . import api
 from ihome import db
-from flask import current_app, jsonify, request, g
+from flask import current_app, jsonify, request, g, session
 from ihome.models import Area, House, Facility, HouseImage, User
 from ihome.utils.commons import RET
 from ihome import redis_store, constants
@@ -214,9 +214,9 @@ def get_house_index():
         current_app.logger.error(e)
         ret = None
     if ret:
-       current_app.logger.info("hit house index info redis")
-       # 因为redis中保存的是json字符串,所以直接进行字符串拼接返回
-       return '{"errno": 0, "errmsg":"OK", "data":%s}' % ret, 200, {"Content-Type": "applcation/json"}
+        current_app.logger.info("hit house index info redis")
+        # 因为redis中保存的是json字符串,所以直接进行字符串拼接返回
+        return '{"errno": 0, "errmsg":"OK", "data":%s}' % ret, 200, {"Content-Type": "application/json"}
     else:
         try:
             # 查询数据库，返回房屋订单最多的５条数据
@@ -228,7 +228,7 @@ def get_house_index():
             return jsonify(errno=RET.NODATA, errmsg="查询无数据")
         
         houses_list = []
-        for house in houses_list:
+        for house in houses:
             if not house.index_image_url:
                 continue
             houses_list.append(house.to_basic_dict())
@@ -240,7 +240,7 @@ def get_house_index():
         except Exception as e:
             current_app.logger.error(e)
         
-        return '{"errno": 0, "errmsg":"OK", "data":%s}' % json_houses, 200, {"Content-Type": "applcation/json"}
+        return '{"errno": 0, "errmsg":"OK", "data":%s}' % json_houses, 200, {"Content-Type": "application/json"}
 
 
 @api.route("/houses/<int:house_id>", methods=["GET"])

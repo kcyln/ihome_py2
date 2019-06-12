@@ -22,55 +22,60 @@
             </div>
         </div>
         <div class="swiper-container">
+        </div>
+        <script type="text/html" id="house-image-tmpl">
             <ul class="swiper-wrapper">
-                <li class="swiper-slide"><img src="/static/images/home01.jpg"></li>
-                <li class="swiper-slide"><img src="/static/images/home02.jpg"></li>
-                <li class="swiper-slide"><img src="/static/images/home03.jpg"></li>
+                {{ each img_urls as img_url }}
+                <li class="swiper-slide"><img src="{{img_urls}}"></li>
+                {{ /each }}
             </ul>
             <div class="swiper-pagination"></div>
-            <div class="house-price">￥<span>300</span>/晚</div>
-        </div>
+            <div class="house-price">￥<span>{{(price/100.0).toFixed(0)}}</span>/晚</div>
+        </script>
+    
         <div class="detail-con">
+        </div>
+        <script type="text/html" id="house-detail-tmpl">
             <div class="detail-header layout-style">
-                <h2 class="house-title">房屋标题</h2> 
-                <div class="landlord-pic"><img src="/static/images/landlord01.jpg"></div>
-                <h2 class="landlord-name">房东： <span>房东姓名</span></h2>
+                <h2 class="house-title">{{house.title}}</h2> 
+                <div class="landlord-pic"><img src="{{house.user_avatar}}"></div>
+                <h2 class="landlord-name">房东： <span>{{house.user_name}}</span></h2>
             </div>
             <div class="house-info layout-style">
                <h3>房屋地址</h3>
                <ul class="house-info-list text-center">
-                    <li>地址内容中关村</li>
+                    <li>{{house.address}}</li>
                </ul>
             </div>
             <ul class="house-type layout-style">
                 <li>
                     <span class="icon-house"></span>
                     <div class="icon-text">
-                        <h3>出租6间</h3>
-                        <p>房屋面积:200平米</p> 
-                        <p>房屋户型:三室两厅两卫</p>
+                        <h3>出租{{ house.room_count }}间</h3>
+                        <p>房屋面积:{{ house.acreage }}平米</p> 
+                        <p>房屋户型:{{house.unit}}</p>
                     </div>
                 </li>
                 <li>
                     <span class="icon-user"></span>
                     <div class="icon-text">
-                        <h3>宜住10人</h3>
+                        <h3>宜住{{house.capacity}}人</h3>
                     </div>
                 </li>
                 <li>
                     <span class="icon-bed"></span>
                     <div class="icon-text">
                         <h3>卧床配置</h3>
-                        <p>双人床两张</p>
+                        <p>{{house.beds}}</p>
                     </div>
                 </li>
             </ul> 
             <div class="house-info layout-style">
                 <h3>房间详情</h3>
                 <ul class="house-info-list">
-                    <li>收取押金<span>2000</span></li>
-                    <li>最少入住天数<span>1</span></li>
-                    <li>最多入住天数<span>无限制</span></li>
+                    <li>收取押金<span>{{(house.deposit/100.0).toFixed(0)}}</span></li>
+                    <li>最少入住天数<span>{{house.min_days}}</span></li>
+                    <li>最多入住天数<span>{{ if house.max_dys == 0 }}无限制{{else}}{{house.max_days}}{{/if}}</span></li>
                 </ul>
             </div>
             <div class="house-facility layout-style">
@@ -101,16 +106,20 @@
                     <li><span class="jinzhi-ico"></span>浴缸</li>
                 </ul>
             </div> 
+            {{ if house.comments }}
             <div class="house-info layout-style">
                 <h3>评价信息</h3>
                 <ul class="house-comment-list">
+                    {{ each house.comments as comment }}
                     <li>
-                        <p>用户名<span class="fr">2016-11-11 20:00:00</span></p>
-                        <p>感觉不错</p>
+                        <p>{{comment.user_name}}<span class="fr">{{comment.ctime}}</span></p>
+                        <p>{{comment.comment}}</p>
                     </li>
+                    {{ /each }}
                 </ul>
             </div>
-        </div>
+            {{ /if }}
+        </script>
         <a class="book-house" href="">即刻预定</a>
         <div class="footer">
             <p><span><i class="fa fa-copyright"></i></span>爱家租房&nbsp;&nbsp;享受家的温馨</p>
