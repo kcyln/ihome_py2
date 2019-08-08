@@ -51,9 +51,9 @@ function goToSearchPage(th) {
     if (undefined == areaName) areaName="";
     url += ("aname=" + areaName);
     url += "&";
-    url += ("sd=" + $(th).attr("start-date"));
+    url += ("startDate=" + $(th).attr("start-date"));
     url += "&";
-    url += ("ed=" + $(th).attr("end-date"));
+    url += ("endDate=" + $(th).attr("end-date"));
     location.href = url;
 }
 

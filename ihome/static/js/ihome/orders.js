@@ -17,6 +17,28 @@ function getCookie(name) {
 $(document).ready(function(){
     $('.modal').on('show.bs.modal', centerModals);      //当模态框出现的时候
     $(window).on('resize', centerModals);
+    // 查询房客订单
+    $.get("/api/v1.0/user/orders?role=custom", function(resp){
+        if (resp.errno == "0"){
+            $(".order-list").html(template("orders-list-tmpl", {orders:resp.data.orders}));
+            $(".order-pay").on("click", function(){
+                var orderId = $(this).parents("li").attr("order-id");
+                $.ajax({
+                    url: "/api/v1.0/orders" + orderId + "/payment",
+                    type: "POST",
+                    dataType: "json",
+                    headers: {"X-CSRFToken": getCookie("csrf_token")},
+                    success: function(resp){
+                        if (resp.errno == "4101"){
+                            location.href = "/login.html";
+                        }else if (resp.errno == "0"){
+                            location.href = resp.data.pay_url;
+                        }
+                    }
+                })
+            })
+        }
+    })
     $(".order-comment").on("click", function(){
         var orderId = $(this).parents("li").attr("order-id");
         $(".modal-comment").attr("order-id", orderId);

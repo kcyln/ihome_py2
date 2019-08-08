@@ -1,3 +1,8 @@
+var cur_page=1;
+var next_page=1;
+var total_page=1;
+var house_data_querying=true;  // 是否正在向后台获取数据
+
 
 function decodeQuery(){
     var search = decodeURI(document.location.search);
@@ -20,11 +25,48 @@ function updateFilterDateDisplay() {
     }
 }
 
+// 更新房源列表信息
+// action表示从后端请求的数据在前端的展示方式
+// 默认采用追加方式
+// action=renew　代表页面数据清空从新展示
+function updateHouseData(action){
+    var areaId = $(".filter-area li.active").attr("area-id");
+    if (undefined == areaId) {areaId = "";}
+    var startDate = $("#start-date").val();
+    var endDate = $("#end-date").val();
+    var sortKey = $(".filter-sort li.active").attr("sort-key");
+    var params = {
+        aid: areaId,
+        start_date: startDate,
+        end_date: endDate,
+        sort_key: sortKey,
+        page: next_page
+    }
+    $.get("/api/v1.0/houses", params, function(resp){
+        house_data_querying = false;
+        
+        if (resp.errno == "0"){
+            if (resp.data.total_page == 0){
+                $(".house-list").html("暂时没有符合您查询的房屋信息")
+            }else{
+                total_page = resp.data.total_page;
+                if(action == "renew"){
+                    cur_page = 1;
+                    $(".house-list").html(template("house-list-tmpl", {houses:resp.data.houses}))
+                }else{
+                    cur_page = next_page;
+                    $(".house-list").append(template("house-list-tmpl", {houses:resp.data.houses}))
+                }
+            }
+        }
+    })
+}
+
 
 $(document).ready(function(){
     var queryData = decodeQuery();
-    var startDate = queryData["sd"];
-    var endDate = queryData["ed"];
+    var startDate = queryData["startDate"];
+    var endDate = queryData["endDate"];
     $("#start-date").val(startDate); 
     $("#end-date").val(endDate); 
     updateFilterDateDisplay();
@@ -32,6 +74,54 @@ $(document).ready(function(){
     if (!areaName) areaName = "位置区域";
     $(".filter-title-bar>.filter-title").eq(1).children("span").eq(0).html(areaName);
 
+    // 获取筛选条件中的城市区域信息
+    $.get("/api/v1.0/areas", function(data){
+        if (data.errno == "0"){
+            var areaId = queryData["aid"]
+            if (areaId){
+                // 遍历从后端获取的城区信息，添加到页面中
+                for (var i=0; i<data.data.length; i++){
+                    // 对于从url查询字符串参数拿到的城区，在页面中坐高亮展示
+                    // 后端获取到的城区id是整型，从url参数中获取到的是字符串，所以将url中获取的转换为整型
+                    areaId = parseInt(areaId);
+                    if (data.data[i].aid == areaId){
+                        $(".filter-area").append('<li area-id="'+data.data[i].aid+'" class="active">'+data.data[i].aname+'</li>')
+                    }else{
+                        $(".filter-area").append('<li area-id="'+data.data[i].aid+'">'+data.data[i].aname+'</li>')
+                    }
+                }
+            }else{
+                for (var i=0; i<data.data.length; i++){
+                    $(".filter-area").append('<li area-id="'+data.data[i].aid+'">'+data.data[i].aname+'</li>')
+                }
+            }
+            // 在页面添加好城区选项信息后，更新展示房屋列表信息
+            updateHouseData("renew");
+            // 获取页面显示窗口的高度
+            var windowHeight = $(window).height();
+            // 为窗口的滚动添加事件函数
+            window.onscroll=function(){
+                var b = document.documentElement.scrollTop==0?document.body.scrollTop:document.body.clientTop
+                var c = document.documentElement.scrollTop==0?document.body.scrollHeight:document.body.clientHeight
+                // 如果滚动到接近窗口底部
+                if(c-b<windowHeight+50){
+                    // 如果没有正在向后端发送查询房屋列表信息的请求
+                    if(!house_data_querying){
+                        house_data_querying=true;
+                        if(cur_page<total_page){
+                            next_page = cur_page +1
+                            updateHouseData();                        
+                        }else{
+                            house_data_querying=false
+                        }
+                    }
+                }
+
+            }
+        }
+    })
+
+    
 
     $(".input-daterange").datepicker({
         format: "yyyy-mm-dd",
@@ -58,6 +148,10 @@ $(document).ready(function(){
         $(this).hide();
         $filterItem.removeClass('active');
         updateFilterDateDisplay();
+        cur_page=1;
+        next_page=1;
+        total_page=1;
+        updateHouseData("renew")
 
     });
     $(".filter-item-bar>.filter-area").on("click", "li", function(e) {
