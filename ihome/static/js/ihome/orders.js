@@ -37,10 +37,38 @@ $(document).ready(function(){
                     }
                 })
             })
+            $(".order-comment").on("click", function(){
+                var orderId = $(this).parents("li").attr("order-id");
+                $(".modal-comment").attr("order-id", orderId);
+            });
+            $(".modal-comment").on("click", function(){
+                var orderId = $(this).attr("order-id");
+                var comment = $("#comment").val();
+                if (!comment) return;
+                var data = {
+                    order_id: orderId,
+                    comment: comment
+                }
+                // 处理评论
+                $.ajax({
+                    url: "/api/v1.0/orders/" + orderId + "/comment",
+                    type: "PUT",
+                    data: JSON.stringify(data),
+                    contentType: "application/json",
+                    dataType: "json",
+                    headers: {"X-CSRFToken": getCookie("csrf_token")},
+                    success: function(resp){
+                        if (resp.errno == "4101"){
+                            location.href = "/login.html";
+                        }else if (resp.errno == "0"){
+                            $(".orders-list li[order-id="+ orderId +"] div.order-content div.order-text ul li:eq(4) span").html("已完成");
+                            $(".orders-list li[order-id="+ orderId +"] div.order-title div.order-operate").hide();
+                            $("#comment-modal").modal("hide");
+                        }
+                    }
+                })
+            })
         }
     })
-    $(".order-comment").on("click", function(){
-        var orderId = $(this).parents("li").attr("order-id");
-        $(".modal-comment").attr("order-id", orderId);
-    });
+    
 });

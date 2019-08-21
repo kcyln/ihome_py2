@@ -49,7 +49,7 @@ $(document).ready(function(){
     var queryData = decodeQuery();
     var houseId = queryData["hid"];
     // 获取房屋的基本信息
-    $.get("/api/v1.0/houses" + houseId, function(resp){
+    $.get("/api/v1.0/houses/" + houseId, function(resp){
         if (resp.errno == "0"){
             $(".house-info img").attr("src", resp.data.house.img_urls[0]);
             $(".house-text h3").html(resp.data.house.title);
@@ -57,7 +57,7 @@ $(document).ready(function(){
         }
     })
     // 订单提交
-    $(".dubmit-btn").on("click", function(e){
+    $(".submit-btn").on("click", function(e){
         if ($(".order-amount span").html()){
             $(this).prop("disabled", true);
             var startDate = $("#start-date").val();
@@ -68,7 +68,7 @@ $(document).ready(function(){
                 "end_date": endDate
             }
             $.ajax({
-                url: "/api/v1.0/orderes",
+                url: "/api/v1.0/orders",
                 type: "POST",
                 data: JSON.stringify(data),
                 contentType: "application/json",
